@@ -98,9 +98,9 @@ namespace SimConnectSharp
             };
         }
 
-        public void SubscribeLocationData(SC_PERIOD period)
+        public void SubscribeLocationData(SC_PERIOD period, uint interval = 0)
         {
-            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, (SIMCONNECT_PERIOD)period, 0, 0, 0, 0);
+            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, (SIMCONNECT_PERIOD)period, 0, interval, 0, 0);
             this.LocationTracking = true;
         }
 
