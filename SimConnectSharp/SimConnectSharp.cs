@@ -9,6 +9,7 @@ namespace SimConnectSharp
     public class SimConnectSharp
     {
         public SimConnect SimConnect = null;
+        public bool LocationTracking = false;
         public LocationData LastLocationData;
         public ConnectionInfo ConnectionInfo = new ConnectionInfo();
 
@@ -23,6 +24,15 @@ namespace SimConnectSharp
             SimStop,
             Crashed,
             CrashedAndReset
+        }
+
+        public enum SC_PERIOD
+        {
+            NEVER,
+            ONCE,
+            VISUAL_FRAME,
+            SIM_FRAME,
+            SECOND,
         }
 
         private readonly EventWaitHandle _scEventHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
@@ -57,7 +67,6 @@ namespace SimConnectSharp
             this.SimConnect.OnRecvOpen += Sim_OnRecvOpen;
             this.SimConnect.OnRecvQuit += Sim_OnRecvQuit;
             this.SimConnect.OnRecvSimobjectData += Sim_OnRecvSimobjectData;
-            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, 0, 0, 1, 0);
 
             this.SimConnect.OnRecvEvent += Sim_OnRecvEvent;
 
@@ -87,6 +96,18 @@ namespace SimConnectSharp
                 SimConnectVersion = $"{data.dwSimConnectVersionMajor}.{data.dwSimConnectVersionMinor}.{data.dwSimConnectBuildMajor}.{data.dwSimConnectBuildMinor}",
                 SimConnectBuild = $"{data.dwSimConnectBuildMajor}.{data.dwSimConnectBuildMinor}"
             };
+        }
+
+        public void SubscribeLocationData(SC_PERIOD period)
+        {
+            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, (SIMCONNECT_PERIOD)period, 0, 0, 0, 0);
+            this.LocationTracking = true;
+        }
+
+        public void UnsubscribeLocationData()
+        {
+            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            this.LocationTracking = false;
         }
 
         private void Sim_OnRecvQuit(SimConnect sender, SIMCONNECT_RECV data)
@@ -130,11 +151,6 @@ namespace SimConnectSharp
                     Console.WriteLine($"EVENT: {((EVENTS)data.uEventID).ToString()}");
                     break;
             }
-        }
-
-        public void RequestLocationData()
-        {
-            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, 0, 0, 1, 0);
         }
 
         public void Disconnect()
