@@ -73,7 +73,6 @@
   <ItemGroup>
     <Compile Include="ConnectionInfo.cs" />
     <Compile Include="LocationData.cs" />
-    <Compile Include="Scrap.cs" />
     <Compile Include="SimConnectSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -17,11 +17,19 @@ namespace SCSTest
 
             while (true)
             {
-                LocationData scslld = scs.LastLocationData;
-                if (LastLastLocationData != scslld)
+                if (scs.ConnectionInfo == null || !scs.ConnectionInfo.Connected)
                 {
-                    if (verbose) Console.WriteLine(DateTime.Now + " " + scslld);
-                    LastLastLocationData = scslld;
+                    if (scs == null) scs = new SimConnectSharp.SimConnectSharp();
+                    scs.Connect();
+                }
+                else
+                {
+                    LocationData scslld = scs.LastLocationData;
+                    if (LastLastLocationData != scslld)
+                    {
+                        if (verbose) Console.WriteLine(DateTime.Now + " " + scslld);
+                        LastLastLocationData = scslld;
+                    }
                 }
                 Thread.Sleep(1000);
             }
