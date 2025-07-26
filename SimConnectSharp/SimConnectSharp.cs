@@ -10,7 +10,7 @@ namespace SimConnectSharp
     {
         public SimConnect SimConnect = null;
         public bool LocationTracking = false;
-        public LocationData LastLocationData;
+        public AircraftData LastLocationData;
         public ConnectionInfo ConnectionInfo = new ConnectionInfo();
 
         enum DEFINITIONS { LocationDataStruct }
@@ -60,9 +60,16 @@ namespace SimConnectSharp
             this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Latitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
             this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Longitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
             this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Altitude", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Vertical Speed", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "TRANSPONDER CODE:1", "number", SIMCONNECT_DATATYPE.INT32, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "SURFACE RELATIVE GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "GPS GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "MAGNETIC COMPASS", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
             this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Kohlsman setting hg", "inHg", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
-            this.SimConnect.RegisterDataDefineStruct<LocationDataStruct>(DEFINITIONS.LocationDataStruct);
+            this.SimConnect.RegisterDataDefineStruct<AircraftDataStruct>(DEFINITIONS.LocationDataStruct);
 
             this.SimConnect.OnRecvOpen += Sim_OnRecvOpen;
             this.SimConnect.OnRecvQuit += Sim_OnRecvQuit;
@@ -119,8 +126,8 @@ namespace SimConnectSharp
         {
             if ((REQUESTS)data.dwRequestID == REQUESTS.LocationRequest)
             {
-                var s = (LocationDataStruct)data.dwData[0];
-                this.LastLocationData = LocationData.FromStruct(s);
+                var s = (AircraftDataStruct)data.dwData[0];
+                this.LastLocationData = AircraftData.FromStruct(s);
             }
         }
 
