@@ -1,5 +1,7 @@
 ﻿using Microsoft.FlightSimulator.SimConnect;
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -13,7 +15,7 @@ namespace SimConnectSharp
         public AircraftData LastLocationData;
         public ConnectionInfo ConnectionInfo = new ConnectionInfo();
 
-        enum DEFINITIONS { LocationDataStruct }
+        enum DEFINITIONS { AircraftDataStruct }
         enum REQUESTS { LocationRequest }
         enum EVENTS
         {
@@ -48,6 +50,7 @@ namespace SimConnectSharp
             }
             catch (COMException ex)
             {
+                Debug.WriteLine("SIMCONNECT CREATE FAIL: " + ex.Message);
                 return false;
             }
             if (this.SimConnect != null) { Console.WriteLine("MSFS Connected"); }
@@ -56,20 +59,13 @@ namespace SimConnectSharp
             _scReceiveThread.IsBackground = true;
             _scReceiveThread.Start();
 
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Title", null, SIMCONNECT_DATATYPE.STRING256, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Latitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Longitude", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Plane Altitude", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Vertical Speed", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "TRANSPONDER CODE:1", "number", SIMCONNECT_DATATYPE.INT32, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "SURFACE RELATIVE GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "GPS GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "MAGNETIC COMPASS", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
-            this.SimConnect.AddToDataDefinition(DEFINITIONS.LocationDataStruct, "Kohlsman setting hg", "inHg", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+            foreach (PropertyInfo property in typeof(AircraftData).GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<SimConnectVariable>();
+                this.SimConnect.AddToDataDefinition(DEFINITIONS.AircraftDataStruct, attribute.SimVarName, attribute.Unit, attribute.DataType, 0, SimConnect.SIMCONNECT_UNUSED);
+            }
 
-            this.SimConnect.RegisterDataDefineStruct<AircraftDataStruct>(DEFINITIONS.LocationDataStruct);
+            this.SimConnect.RegisterDataDefineStruct<AircraftDataStruct>(DEFINITIONS.AircraftDataStruct);
 
             this.SimConnect.OnRecvOpen += Sim_OnRecvOpen;
             this.SimConnect.OnRecvQuit += Sim_OnRecvQuit;
@@ -107,13 +103,13 @@ namespace SimConnectSharp
 
         public void SubscribeLocationData(SC_PERIOD period, uint interval = 0)
         {
-            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, (SIMCONNECT_PERIOD)period, 0, interval, 0, 0);
+            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.AircraftDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, (SIMCONNECT_PERIOD)period, 0, interval, 0, 0);
             this.LocationTracking = true;
         }
 
         public void UnsubscribeLocationData()
         {
-            this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.LocationDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            if (this.SimConnect != null) this.SimConnect.RequestDataOnSimObject(REQUESTS.LocationRequest, DEFINITIONS.AircraftDataStruct, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
             this.LocationTracking = false;
         }
 

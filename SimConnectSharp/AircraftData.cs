@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System;
+using System.Reflection;
+using Microsoft.FlightSimulator.SimConnect;
 
 namespace SimConnectSharp
 {
@@ -7,33 +9,79 @@ namespace SimConnectSharp
     public struct AircraftDataStruct
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        [SimConnectVariable("TITLE", null, SIMCONNECT_DATATYPE.STRING256)]
         public String title;
+
+        [SimConnectVariable("PLANE LATITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double latitude;
+
+        [SimConnectVariable("PLANE LONGITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double longitude;
+
+        [SimConnectVariable("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double altitude;
+
+        [SimConnectVariable("VERTICAL SPEED", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64)]
         public double vertical_speed;
+
+        [SimConnectVariable("TRANSPONDER CODE:1", "number", SIMCONNECT_DATATYPE.INT32)]
         public int transponder_code;
+
+        [SimConnectVariable("SURFACE RELATIVE GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64)]
         public double surface_relative_ground_speed;
+
+        [SimConnectVariable("GPS GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64)]
         public double gps_ground_speed;
+
+        [SimConnectVariable("MAGNETIC COMPASS", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double magnetic_compass;
+
+        [SimConnectVariable("CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.INT8)]
         public bool contact_point_is_on_ground;
+
+        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double indicated_altitude;
+
+        [SimConnectVariable("KOHLSMAN SETTING HG", "inHg", SIMCONNECT_DATATYPE.FLOAT64)]
         public double kohlsmann;
     }
 
     public class AircraftData
     {
+        [SimConnectVariable("TITLE", null, SIMCONNECT_DATATYPE.STRING256)]
         public string Title { get; set; }
+
+        [SimConnectVariable("PLANE LATITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Latitude { get; set; }
+
+        [SimConnectVariable("PLANE LONGITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Longitude { get; set; }
+
+        [SimConnectVariable("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Altitude { get; set; }
+
+        [SimConnectVariable("VERTICAL SPEED", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64)]
         public double VerticalSpeed { get; set; }
+
+        [SimConnectVariable("TRANSPONDER CODE:1", "number", SIMCONNECT_DATATYPE.INT32)]
         public int TransponderCode { get; set; }
+
+        [SimConnectVariable("SURFACE RELATIVE GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64)]
         public double SurfaceRelativeGroundSpeed { get; set; }
+
+        [SimConnectVariable("GPS GROUND SPEED", "knots", SIMCONNECT_DATATYPE.FLOAT64)]
         public double GpsGroundSpeed { get; set; }
+
+        [SimConnectVariable("MAGNETIC COMPASS", "degrees", SIMCONNECT_DATATYPE.FLOAT64)]
         public double MagneticCompass { get; set; }
+
+        [SimConnectVariable("CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.INT8)]
         public bool ContactPointIsOnGround { get; set; }
+
+        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double IndicatedAltitude {  get; set; }
+
+        [SimConnectVariable("KOHLSMAN SETTING HG", "inHg", SIMCONNECT_DATATYPE.FLOAT64 )]
         public double Kohlsmann { get; set; }
 
         public static AircraftData FromStruct(AircraftDataStruct dataStruct)
@@ -96,18 +144,32 @@ namespace SimConnectSharp
 
         public string ToString(bool newLine = false)
         {
-            return $"TITLE: ${Title}; " + (newLine? "\n" : "") +
-                $"PLANE LATITUDE: {Latitude}; " + (newLine ? "\n" : "") +
-                $"PLANE LONGITUDE: {Longitude}; " + (newLine ? "\n" : "") +
-                $"PLANE ALTITUDE: {Altitude}; " + (newLine ? "\n" : "") +
-                $"VERTICAL SPEED: {VerticalSpeed}; " + (newLine ? "\n" : "") +
-                $"TRANSPONDER CODE:1: {TransponderCode}; " + (newLine ? "\n" : "") +
-                $"SURFACE RELATIVE GROUND SPEED: {SurfaceRelativeGroundSpeed}; " + (newLine ? "\n" : "") +
-                $"GPS GROUND SPEED: {GpsGroundSpeed}; " + (newLine ? "\n" : "") +
-                $"MAGNETIC COMPASS: {MagneticCompass}; " + (newLine ? "\n" : "") +
-                $"CONTACT POINT IS ON GROUND: {ContactPointIsOnGround}; " + (newLine ? "\n" : "") +
-                $"INDICATED ALTITUDE: {IndicatedAltitude}; " + (newLine ? "\n" : "") +
-                $"KOHLSMAN SETTING HG: {Kohlsmann};";
+            string ret = "";
+            foreach(PropertyInfo property in typeof(AircraftData).GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<SimConnectVariable>();
+                ret += $"{attribute.SimVarName} = {property.GetValue(this, null)} ({attribute.Unit});" + (newLine ? "\n" : "");
+            }
+            return ret;
         }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.GenericParameter | System.AttributeTargets.Field)]
+    public class SimConnectVariable : System.Attribute
+    {
+        public string SimVarName;
+        public string Unit;
+        public SIMCONNECT_DATATYPE DataType;
+
+        public SimConnectVariable(string name, string unit, SIMCONNECT_DATATYPE datatype)
+        {
+            SimVarName = name;
+            Unit = unit;
+            DataType = datatype;
+        }
+
+        public string GetName() => SimVarName;
+        public string GetUnit() => Unit;
+        public SIMCONNECT_DATATYPE GetDataType() => DataType;
     }
 }
