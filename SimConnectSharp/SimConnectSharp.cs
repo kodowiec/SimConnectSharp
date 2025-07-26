@@ -40,11 +40,11 @@ namespace SimConnectSharp
 
         public SimConnectSharp() { }
 
-        public bool Connect()
+        public bool Connect(string appName = "SCS CLIENT")
         {
             try
             {
-                this.SimConnect = new SimConnect("SCS CLIENT", IntPtr.Zero, 0, _scEventHandle, 0);
+                this.SimConnect = new SimConnect(appName, IntPtr.Zero, 0, _scEventHandle, 0);
             }
             catch (COMException ex)
             {
