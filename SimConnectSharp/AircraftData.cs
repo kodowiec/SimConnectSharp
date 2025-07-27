@@ -21,6 +21,9 @@ namespace SimConnectSharp
         [SimConnectVariable("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double altitude;
 
+        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        public double indicated_altitude;
+
         [SimConnectVariable("VERTICAL SPEED", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64)]
         public double vertical_speed;
 
@@ -38,9 +41,6 @@ namespace SimConnectSharp
 
         [SimConnectVariable("CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.INT8)]
         public bool contact_point_is_on_ground;
-
-        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
-        public double indicated_altitude;
     }
 
     public class AircraftData
@@ -56,6 +56,9 @@ namespace SimConnectSharp
 
         [SimConnectVariable("PLANE ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double Altitude { get; set; }
+
+        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
+        public double IndicatedAltitude { get; set; }
 
         [SimConnectVariable("VERTICAL SPEED", "feet/minute", SIMCONNECT_DATATYPE.FLOAT64)]
         public double VerticalSpeed { get; set; }
@@ -74,9 +77,6 @@ namespace SimConnectSharp
 
         [SimConnectVariable("CONTACT POINT IS ON GROUND", "Boolean", SIMCONNECT_DATATYPE.INT8)]
         public bool ContactPointIsOnGround { get; set; }
-
-        [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
-        public double IndicatedAltitude {  get; set; }
 
         public static AircraftData FromStruct(AircraftDataStruct dataStruct)
         {
