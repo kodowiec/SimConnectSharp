@@ -158,7 +158,7 @@ namespace SimConnectSharp
 
         public void Disconnect()
         {
-            if (!ConnectionInfo.Connected) return;
+            if (ConnectionInfo == null || !ConnectionInfo.Connected) return;
 
             try
             {
