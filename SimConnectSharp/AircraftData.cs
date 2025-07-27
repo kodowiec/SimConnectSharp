@@ -41,9 +41,6 @@ namespace SimConnectSharp
 
         [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double indicated_altitude;
-
-        [SimConnectVariable("KOHLSMAN SETTING HG", "inHg", SIMCONNECT_DATATYPE.FLOAT64)]
-        public double kohlsmann;
     }
 
     public class AircraftData
@@ -81,9 +78,6 @@ namespace SimConnectSharp
         [SimConnectVariable("INDICATED ALTITUDE", "feet", SIMCONNECT_DATATYPE.FLOAT64)]
         public double IndicatedAltitude {  get; set; }
 
-        [SimConnectVariable("KOHLSMAN SETTING HG", "inHg", SIMCONNECT_DATATYPE.FLOAT64 )]
-        public double Kohlsmann { get; set; }
-
         public static AircraftData FromStruct(AircraftDataStruct dataStruct)
         {
             return new AircraftData
@@ -98,8 +92,7 @@ namespace SimConnectSharp
                 GpsGroundSpeed = dataStruct.gps_ground_speed,
                 MagneticCompass = dataStruct.magnetic_compass,
                 ContactPointIsOnGround = dataStruct.contact_point_is_on_ground,
-                IndicatedAltitude = dataStruct.indicated_altitude,
-                Kohlsmann = dataStruct.kohlsmann
+                IndicatedAltitude = dataStruct.indicated_altitude
             };
         }
 
@@ -119,8 +112,7 @@ namespace SimConnectSharp
                 gps_ground_speed = GpsGroundSpeed,
                 magnetic_compass = MagneticCompass,
                 contact_point_is_on_ground = ContactPointIsOnGround,
-                indicated_altitude = IndicatedAltitude,
-                kohlsmann = Kohlsmann
+                indicated_altitude = IndicatedAltitude
             };
 
             return dataStruct;
@@ -138,8 +130,7 @@ namespace SimConnectSharp
                 $"GPS GROUND SPEED: {GpsGroundSpeed}; " +
                 $"MAGNETIC COMPASS: {MagneticCompass}; " +
                 $"CONTACT POINT IS ON GROUND: {ContactPointIsOnGround}; " +
-                $"INDICATED ALTITUDE: {IndicatedAltitude}; " +
-                $"KOHLSMAN SETTING HG: {Kohlsmann};";
+                $"INDICATED ALTITUDE: {IndicatedAltitude};";
         }
 
         public string ToString(bool newLine = false)
@@ -148,7 +139,7 @@ namespace SimConnectSharp
             foreach(PropertyInfo property in typeof(AircraftData).GetProperties())
             {
                 var attribute = property.GetCustomAttribute<SimConnectVariable>();
-                ret += $"{attribute.SimVarName} = {property.GetValue(this, null)} ({attribute.Unit});" + (newLine ? "\n" : "");
+                ret += $"{attribute.SimVarName} = {property.GetValue(this, null):F6} ({attribute.Unit});" + (newLine ? "\n" : "");
             }
             return ret;
         }
